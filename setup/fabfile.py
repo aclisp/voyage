@@ -27,6 +27,7 @@ def check_os():
 def install_docker_prerequisites():
 	check_os()
 	sudo('apt-get update')
+	sudo('apt-get upgrade')
 	sudo('apt-get -y install linux-image-generic-lts-trusty')
 	print " *** NEED TO REBOOT MANUALLY *** "
 
