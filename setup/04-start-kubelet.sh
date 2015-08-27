@@ -4,7 +4,8 @@ unset ftp_proxy
 unset rsync_proxy
 unset no_proxy
 
-source ./env.sh
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source $DIR/env.sh
 source /run/flannel/subnet.env
 mkdir -p /etc/kubernetes/manifests
 FLANNEL_SUBNET_IP=$(echo $FLANNEL_SUBNET | sed 's/\/.*//')

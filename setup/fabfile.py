@@ -50,4 +50,23 @@ def install_docker():
 	sudo('iptables -t nat -n -L')
 	sudo('iptables -t nat -F')
 
+@task
+def install_binary():
+	with lcd("$HOME"):
+		packages = local('ls -1r sigma-package-*.tar.gz', capture=True)
+		#print " SIGMA PACKAGES ARE "
+		#print packages
+		package = packages.split()[0] # Get the latest version!
+		if env.host:
+			local('scp {pkg} {host}:/tmp'.format(pkg=package, host=env.host))
+	sudo("tar zxvf /tmp/{pkg} -C /usr/local/bin/".format(pkg=package))
+	# Verify binary in PATH
+	sudo("which docker flanneld kubelet kubectl kube-apiserver kube-controller-manager kube-scheduler")
+	# Install SIGMA scripts
+	run("sudo mkdir -p /opt/sigma/bin /opt/sigma/log")
+	run("mkdir -p ~/sigma/bin")
+	local('scp *.sh {host}:~/sigma/bin'.format(host=env.host))
+	run('sudo cp ~/sigma/bin/* /opt/sigma/bin')
+	# Setup kubectl
+	run('/opt/sigma/bin/00-setup-kubectl.sh')
 
