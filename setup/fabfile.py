@@ -82,9 +82,9 @@ def install_binary():
 	run('/opt/sigma/bin/00-setup-kubectl.sh')
 	run('sudo cp ~/.kube/config /var/lib/sigma/kubeconfig')
 
-def as_daemon(script, pidfile, logfile):
+def start_daemon(script, pidfile, logfile):
 	# http://stackoverflow.com/questions/8251933/how-can-i-log-the-stdout-of-a-process-started-by-start-stop-daemon
-	return ('start-stop-daemon --start --oknodo '
+	sudo('start-stop-daemon --start --oknodo '
 			'--make-pidfile --pidfile {pidfile} '
 			'--background --startas /bin/bash '
 			'-- -c "exec {script} >{logfile} 2>&1"'.format(
@@ -92,15 +92,47 @@ def as_daemon(script, pidfile, logfile):
 				pidfile=pidfile,
 				logfile=logfile))
 
+def stop_daemon(pidfile):
+	sudo('pkill -P $(<{pidfile}); true'.format(pidfile=pidfile))
+
+def status_daemon(pidfile):
+	pid = sudo('pgrep -P $(<{pidfile}); true'.format(pidfile=pidfile))
+	if pid:
+		sudo('ps -f {pid}'.format(pid=pid))
+	else:
+		print ' *** MISSING COMPONENT *** '
+
 @task
 def start_master():
-	sudo(as_daemon('/opt/sigma/bin/00-MASTER-start-etcd.sh',      '/run/sigma/etcd.pid',       '/var/log/sigma/etcd.log'))
-	sudo(as_daemon('/opt/sigma/bin/01-start-flanneld.sh',         '/run/sigma/flanneld.pid',   '/var/log/sigma/flanneld.log'))
-	sudo(          '/opt/sigma/bin/02-create-cbr0.sh')
-	sudo(as_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log'))
-	sudo(as_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log'))
-	sudo(as_daemon('/opt/sigma/bin/04-MASTER-start-apiserver.sh', '/run/sigma/apiserver.pid',  '/var/log/sigma/apiserver.log'))
-	sudo(as_daemon('/opt/sigma/bin/04-MASTER-start-controller.sh','/run/sigma/controller.pid', '/var/log/sigma/controller.log'))
-	sudo(as_daemon('/opt/sigma/bin/04-MASTER-start-scheduler.sh', '/run/sigma/scheduler.pid',  '/var/log/sigma/scheduler.log'))
-	run(           '/opt/sigma/bin/05-register-node.sh')
+	start_daemon('/opt/sigma/bin/00-MASTER-start-etcd.sh',      '/run/sigma/etcd.pid',       '/var/log/sigma/etcd.log')
+	start_daemon('/opt/sigma/bin/01-start-flanneld.sh',         '/run/sigma/flanneld.pid',   '/var/log/sigma/flanneld.log')
+	sudo(        '/opt/sigma/bin/02-create-cbr0.sh')
+	start_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log')
+	start_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log')
+	start_daemon('/opt/sigma/bin/04-MASTER-start-apiserver.sh', '/run/sigma/apiserver.pid',  '/var/log/sigma/apiserver.log')
+	start_daemon('/opt/sigma/bin/04-MASTER-start-controller.sh','/run/sigma/controller.pid', '/var/log/sigma/controller.log')
+	start_daemon('/opt/sigma/bin/04-MASTER-start-scheduler.sh', '/run/sigma/scheduler.pid',  '/var/log/sigma/scheduler.log')
+	run(         'sleep 5')
+	run(         '/opt/sigma/bin/05-register-node.sh; true')
+
+@task
+def stop_master():
+	stop_daemon('/run/sigma/scheduler.pid')
+	stop_daemon('/run/sigma/controller.pid')
+	stop_daemon('/run/sigma/apiserver.pid')
+	stop_daemon('/run/sigma/kubelet.pid')
+	stop_daemon('/run/sigma/docker.pid')
+	stop_daemon('/run/sigma/flanneld.pid')
+	stop_daemon('/run/sigma/etcd.pid')
+
+@task
+def status_master():
+	status_daemon('/run/sigma/scheduler.pid')
+	status_daemon('/run/sigma/controller.pid')
+	status_daemon('/run/sigma/apiserver.pid')
+	status_daemon('/run/sigma/kubelet.pid')
+	status_daemon('/run/sigma/docker.pid')
+	status_daemon('/run/sigma/flanneld.pid')
+	status_daemon('/run/sigma/etcd.pid')
+
 
