@@ -106,13 +106,14 @@ def status_daemon(pidfile):
 def start_master():
 	start_daemon('/opt/sigma/bin/00-MASTER-start-etcd.sh',      '/run/sigma/etcd.pid',       '/var/log/sigma/etcd.log')
 	start_daemon('/opt/sigma/bin/01-start-flanneld.sh',         '/run/sigma/flanneld.pid',   '/var/log/sigma/flanneld.log')
+	run(         'sleep 1')
 	sudo(        '/opt/sigma/bin/02-create-cbr0.sh')
 	start_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log')
 	start_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-apiserver.sh', '/run/sigma/apiserver.pid',  '/var/log/sigma/apiserver.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-controller.sh','/run/sigma/controller.pid', '/var/log/sigma/controller.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-scheduler.sh', '/run/sigma/scheduler.pid',  '/var/log/sigma/scheduler.log')
-	run(         'sleep 5')
+	run(         'sleep 1')
 	run(         '/opt/sigma/bin/05-register-node.sh; true')
 
 @task
@@ -135,4 +136,24 @@ def status_master():
 	status_daemon('/run/sigma/flanneld.pid')
 	status_daemon('/run/sigma/etcd.pid')
 
+@task
+def start_slave():
+	start_daemon('/opt/sigma/bin/01-start-flanneld.sh',         '/run/sigma/flanneld.pid',   '/var/log/sigma/flanneld.log')
+	run(         'sleep 1')
+	sudo(        '/opt/sigma/bin/02-create-cbr0.sh')
+	start_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log')
+	start_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log')
+	run(         'sleep 1')
+	run(         '/opt/sigma/bin/05-register-node.sh; true')
 
+@task
+def stop_slave():
+	stop_daemon('/run/sigma/kubelet.pid')
+	stop_daemon('/run/sigma/docker.pid')
+	stop_daemon('/run/sigma/flanneld.pid')
+
+@task
+def status_slave():
+	status_daemon('/run/sigma/kubelet.pid')
+	status_daemon('/run/sigma/docker.pid')
+	status_daemon('/run/sigma/flanneld.pid')
