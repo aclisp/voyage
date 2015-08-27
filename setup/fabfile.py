@@ -61,12 +61,35 @@ def install_binary():
 			local('scp {pkg} {host}:/tmp'.format(pkg=package, host=env.host))
 	sudo("tar zxvf /tmp/{pkg} -C /usr/local/bin/".format(pkg=package))
 	# Verify binary in PATH
-	sudo("which docker flanneld kubelet kubectl kube-apiserver kube-controller-manager kube-scheduler")
+	sudo("which "
+		"docker "
+		"flanneld "
+		"kubelet "
+		"kubectl "
+		"kube-apiserver "
+		"kube-controller-manager "
+		"kube-scheduler")
 	# Install SIGMA scripts
-	run("sudo mkdir -p /opt/sigma/bin /opt/sigma/log")
+	run("sudo mkdir -p "
+		"/opt/sigma/bin "
+		"/var/log/sigma "
+		"/run/sigma")
 	run("mkdir -p ~/sigma/bin")
 	local('scp *.sh {host}:~/sigma/bin'.format(host=env.host))
 	run('sudo cp ~/sigma/bin/* /opt/sigma/bin')
 	# Setup kubectl
 	run('/opt/sigma/bin/00-setup-kubectl.sh')
 
+def as_daemon(script, pidfile, logfile):
+	# http://stackoverflow.com/questions/8251933/how-can-i-log-the-stdout-of-a-process-started-by-start-stop-daemon
+	return ('start-stop-daemon --start '
+			'--make-pidfile --pidfile {pidfile} '
+			'--background --startas /bin/bash '
+			'-- -c "exec {script} >{logfile} 2>&1"'.format(
+				script=script, 
+				pidfile=pidfile,
+				logfile=logfile))
+
+@task
+def start_master():
+	sudo(as_daemon('/opt/sigma/bin/00-MASTER-start-etcd.sh', '/run/sigma/etcd.pid', '/var/log/sigma/etcd.log'))
