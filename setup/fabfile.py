@@ -73,16 +73,18 @@ def install_binary():
 	run("sudo mkdir -p "
 		"/opt/sigma/bin "
 		"/var/log/sigma "
+		"/var/lib/sigma "
 		"/run/sigma")
 	run("mkdir -p ~/sigma/bin")
 	local('scp *.sh {host}:~/sigma/bin'.format(host=env.host))
 	run('sudo cp ~/sigma/bin/* /opt/sigma/bin')
 	# Setup kubectl
 	run('/opt/sigma/bin/00-setup-kubectl.sh')
+	run('sudo cp ~/.kube/config /var/lib/sigma/kubeconfig')
 
 def as_daemon(script, pidfile, logfile):
 	# http://stackoverflow.com/questions/8251933/how-can-i-log-the-stdout-of-a-process-started-by-start-stop-daemon
-	return ('start-stop-daemon --start '
+	return ('start-stop-daemon --start --oknodo '
 			'--make-pidfile --pidfile {pidfile} '
 			'--background --startas /bin/bash '
 			'-- -c "exec {script} >{logfile} 2>&1"'.format(
@@ -92,4 +94,13 @@ def as_daemon(script, pidfile, logfile):
 
 @task
 def start_master():
-	sudo(as_daemon('/opt/sigma/bin/00-MASTER-start-etcd.sh', '/run/sigma/etcd.pid', '/var/log/sigma/etcd.log'))
+	sudo(as_daemon('/opt/sigma/bin/00-MASTER-start-etcd.sh',      '/run/sigma/etcd.pid',       '/var/log/sigma/etcd.log'))
+	sudo(as_daemon('/opt/sigma/bin/01-start-flanneld.sh',         '/run/sigma/flanneld.pid',   '/var/log/sigma/flanneld.log'))
+	sudo(          '/opt/sigma/bin/02-create-cbr0.sh')
+	sudo(as_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log'))
+	sudo(as_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log'))
+	sudo(as_daemon('/opt/sigma/bin/04-MASTER-start-apiserver.sh', '/run/sigma/apiserver.pid',  '/var/log/sigma/apiserver.log'))
+	sudo(as_daemon('/opt/sigma/bin/04-MASTER-start-controller.sh','/run/sigma/controller.pid', '/var/log/sigma/controller.log'))
+	sudo(as_daemon('/opt/sigma/bin/04-MASTER-start-scheduler.sh', '/run/sigma/scheduler.pid',  '/var/log/sigma/scheduler.log'))
+	run(           '/opt/sigma/bin/05-register-node.sh')
+

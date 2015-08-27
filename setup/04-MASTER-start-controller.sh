@@ -4,4 +4,4 @@ unset ftp_proxy
 unset rsync_proxy
 unset no_proxy
 
-kube-controller-manager --kubeconfig=/root/.kube/config
+kube-controller-manager --kubeconfig=/var/lib/sigma/kubeconfig
