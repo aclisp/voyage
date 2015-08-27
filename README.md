@@ -34,3 +34,35 @@ A project utilizing docker and kubernetes.
 
 	fab -R master status_master
 	fab -R slaves status_slave
+
+# check
+
+	$ kubectl get no
+	NAME           LABELS    STATUS    AGE
+	172.16.109.1   <none>    Ready     30m
+	172.16.20.1    <none>    Ready     30m
+	172.16.82.1    <none>    Ready     1h
+	172.16.95.1    <none>    Ready     30m
+ 
+	$ kubectl get cs
+	NAME                 STATUS    MESSAGE              ERROR
+	controller-manager   Healthy   ok                   nil
+	scheduler            Healthy   ok                   nil
+	etcd-0               Healthy   {"health": "true"}   nil
+
+# add rc
+
+	$ kubectl create -f rc.nginx.yaml 
+	replicationcontroller "nginx-controller" created
+
+	$ kubectl get rc
+	CONTROLLER         CONTAINER(S)   IMAGE(S)   SELECTOR    REPLICAS   AGE
+	nginx-controller   nginx          nginx      app=nginx   4          5m
+
+	$ kubectl get po -o wide
+	NAME                     READY     STATUS                                  RESTARTS   AGE       NODE
+	nginx-controller-ivrfp   0/1       Image: nginx is not ready on the node   0          6m        172.16.109.1
+	nginx-controller-lvzza   0/1       Image: nginx is not ready on the node   0          6m        172.16.95.1
+	nginx-controller-meaxg   0/1       Image: nginx is not ready on the node   0          6m        172.16.82.1
+	nginx-controller-tb9c5   0/1       Image: nginx is not ready on the node   0          6m        172.16.20.1
+
