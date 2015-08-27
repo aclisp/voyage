@@ -157,3 +157,10 @@ def status_slave():
 	status_daemon('/run/sigma/kubelet.pid')
 	status_daemon('/run/sigma/docker.pid')
 	status_daemon('/run/sigma/flanneld.pid')
+
+@task
+def load_pod_infra():
+	with lcd("$HOME"):
+		package = 'gcr.io__google_containers__pause__0.8.0.tar'
+		local('scp {pkg} {host}:/tmp'.format(pkg=package, host=env.host))
+	sudo('docker load -i /tmp/{pkg}'.format(pkg=package))
