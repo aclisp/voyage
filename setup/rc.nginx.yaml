@@ -17,8 +17,16 @@ spec:
         # The api server enforces this constraint.
         app: nginx
     spec:
+      volumes:
+      - name: webroot
+        hostPath:
+          path: /var/lib/nginx
+
       containers:
       - name: nginx
         image: nginx
+        volumeMounts:
+        - name: webroot
+          mountPath: /usr/share/nginx/html
         ports:
         - containerPort: 80
