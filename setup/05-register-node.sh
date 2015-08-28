@@ -4,7 +4,14 @@ unset ftp_proxy
 unset rsync_proxy
 unset no_proxy
 
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source $DIR/env.sh
 source /run/flannel/subnet.env
+
+# Setup IP masquerade rule for traffic destined outside of overlay network
+sudo iptables -t nat -D POSTROUTING -o ${FLANNEL_IFACE} -j MASQUERADE \! -d ${FLANNEL_NETWORK}
+sudo iptables -t nat -A POSTROUTING -o ${FLANNEL_IFACE} -j MASQUERADE \! -d ${FLANNEL_NETWORK}
+
 FLANNEL_SUBNET_IP=$(echo $FLANNEL_SUBNET | sed 's/\/.*//')
 
 kubectl create -f - <<NODE_JSON
@@ -19,3 +26,5 @@ kubectl create -f - <<NODE_JSON
   }
 }
 NODE_JSON
+
+
