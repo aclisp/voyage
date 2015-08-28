@@ -119,9 +119,11 @@ def start_master():
 	start_daemon('/opt/sigma/bin/04-MASTER-start-scheduler.sh', '/run/sigma/scheduler.pid',  '/var/log/sigma/scheduler.log')
 	run(         'sleep 1')
 	run(         '/opt/sigma/bin/05-register-node.sh; true')
+	start_daemon('/opt/sigma/bin/06-start-kube-proxy.sh',       '/run/sigma/kubeproxy.pid',  '/var/log/sigma/kubeproxy.log')
 
 @task
 def stop_master():
+	stop_daemon('/run/sigma/kubeproxy.pid')
 	stop_daemon('/run/sigma/scheduler.pid')
 	stop_daemon('/run/sigma/controller.pid')
 	stop_daemon('/run/sigma/apiserver.pid')
@@ -132,6 +134,7 @@ def stop_master():
 
 @task
 def status_master():
+	status_daemon('/run/sigma/kubeproxy.pid')
 	status_daemon('/run/sigma/scheduler.pid')
 	status_daemon('/run/sigma/controller.pid')
 	status_daemon('/run/sigma/apiserver.pid')
@@ -149,15 +152,18 @@ def start_slave():
 	start_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log')
 	run(         'sleep 1')
 	run(         '/opt/sigma/bin/05-register-node.sh; true')
+	start_daemon('/opt/sigma/bin/06-start-kube-proxy.sh',       '/run/sigma/kubeproxy.pid',  '/var/log/sigma/kubeproxy.log')
 
 @task
 def stop_slave():
+	stop_daemon('/run/sigma/kubeproxy.pid')
 	stop_daemon('/run/sigma/kubelet.pid')
 	stop_daemon('/run/sigma/docker.pid')
 	stop_daemon('/run/sigma/flanneld.pid')
 
 @task
 def status_slave():
+	status_daemon('/run/sigma/kubeproxy.pid')
 	status_daemon('/run/sigma/kubelet.pid')
 	status_daemon('/run/sigma/docker.pid')
 	status_daemon('/run/sigma/flanneld.pid')
