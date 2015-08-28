@@ -6,4 +6,4 @@ brctl delbr docker0
 iptables -t nat -F
 
 source /run/flannel/subnet.env
-docker daemon --bridge=cbr0 --iptables=false --ip-masq=false --mtu=$FLANNEL_MTU
+docker daemon --bridge=cbr0 --iptables=false --ip-masq=false --mtu=$FLANNEL_MTU --log-level=warn

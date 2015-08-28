@@ -1,4 +1,5 @@
 from fabric.api import *
+import sys
 
 port = 32200
 hosts = [
@@ -12,7 +13,6 @@ env.colorize_errors = True
 _hosts = [x + ':' + str(port) for x in hosts]
 env.roledefs['master'] = _hosts[0:1]
 env.roledefs['slaves'] = _hosts[1:]
-
 
 @task
 def print_hosts():
@@ -81,13 +81,16 @@ def install_binary():
 	# Setup kubectl
 	run('/opt/sigma/bin/00-setup-kubectl.sh')
 	run('sudo cp ~/.kube/config /var/lib/sigma/kubeconfig')
+	# Setup logrotate
+	local('scp logrotate.conf {host}:~/sigma'.format(host=env.host))
+	run('sudo cp ~/sigma/logrotate.conf /etc/logrotate.d/sigma')
 
 def start_daemon(script, pidfile, logfile):
 	# http://stackoverflow.com/questions/8251933/how-can-i-log-the-stdout-of-a-process-started-by-start-stop-daemon
 	sudo('start-stop-daemon --start --oknodo '
 			'--make-pidfile --pidfile {pidfile} '
 			'--background --startas /bin/bash '
-			'-- -c "exec {script} >{logfile} 2>&1"'.format(
+			'-- -c "exec {script} >>{logfile} 2>&1"'.format(
 				script=script, 
 				pidfile=pidfile,
 				logfile=logfile))
@@ -101,6 +104,7 @@ def status_daemon(pidfile):
 		sudo('ps -f {pid}'.format(pid=pid))
 	else:
 		print ' *** MISSING COMPONENT *** '
+		sys.exit(1)
 
 @task
 def start_master():
