@@ -9,8 +9,8 @@ source $DIR/env.sh
 source /run/flannel/subnet.env
 
 # Setup IP masquerade rule for traffic destined outside of overlay network
-#sudo iptables -t nat -D POSTROUTING -o ${FLANNEL_IFACE} -j MASQUERADE \! -d ${FLANNEL_NETWORK}
-#sudo iptables -t nat -A POSTROUTING -o ${FLANNEL_IFACE} -j MASQUERADE \! -d ${FLANNEL_NETWORK}
+sudo iptables -t nat -D POSTROUTING -o ${FLANNEL_IFACE} -j MASQUERADE \! -d ${FLANNEL_NETWORK} -s ${FLANNEL_NETWORK}
+sudo iptables -t nat -A POSTROUTING -o ${FLANNEL_IFACE} -j MASQUERADE \! -d ${FLANNEL_NETWORK} -s ${FLANNEL_NETWORK}
 
 FLANNEL_SUBNET_IP=$(echo $FLANNEL_SUBNET | sed 's/\/.*//')
 
