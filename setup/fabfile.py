@@ -1,12 +1,11 @@
 from fabric.api import *
 import sys
 
-port = 32200
+port = 22
 hosts = [
-	'10.21.196.101', 
-	'10.21.196.123',
-	'10.21.198.37',
-	'10.21.198.38',
+	'192.168.56.101', 
+	'192.168.56.102',
+	'192.168.56.103',
 ]
 
 env.colorize_errors = True
@@ -110,14 +109,12 @@ def status_daemon(pidfile):
 def start_master():
 	start_daemon('/opt/sigma/bin/00-MASTER-start-etcd.sh',      '/run/sigma/etcd.pid',       '/var/log/sigma/etcd.log')
 	start_daemon('/opt/sigma/bin/01-start-flanneld.sh',         '/run/sigma/flanneld.pid',   '/var/log/sigma/flanneld.log')
-	run(         'sleep 1')
 	sudo(        '/opt/sigma/bin/02-create-cbr0.sh')
 	start_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log')
 	start_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-apiserver.sh', '/run/sigma/apiserver.pid',  '/var/log/sigma/apiserver.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-controller.sh','/run/sigma/controller.pid', '/var/log/sigma/controller.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-scheduler.sh', '/run/sigma/scheduler.pid',  '/var/log/sigma/scheduler.log')
-	run(         'sleep 1')
 	run(         '/opt/sigma/bin/05-register-node.sh; true')
 	start_daemon('/opt/sigma/bin/06-start-kube-proxy.sh',       '/run/sigma/kubeproxy.pid',  '/var/log/sigma/kubeproxy.log')
 
@@ -146,11 +143,9 @@ def status_master():
 @task
 def start_slave():
 	start_daemon('/opt/sigma/bin/01-start-flanneld.sh',         '/run/sigma/flanneld.pid',   '/var/log/sigma/flanneld.log')
-	run(         'sleep 1')
 	sudo(        '/opt/sigma/bin/02-create-cbr0.sh')
 	start_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log')
 	start_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log')
-	run(         'sleep 1')
 	run(         '/opt/sigma/bin/05-register-node.sh; true')
 	start_daemon('/opt/sigma/bin/06-start-kube-proxy.sh',       '/run/sigma/kubeproxy.pid',  '/var/log/sigma/kubeproxy.log')
 
