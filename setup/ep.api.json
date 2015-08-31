@@ -1,0 +1,17 @@
+{
+    "kind": "Endpoints",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "api-server"
+    },
+    "subsets": [
+        {
+            "addresses": [
+                { "IP": "221.228.86.213" }
+            ],
+            "ports": [
+                { "port": 8080 }
+            ]
+        }
+    ]
+}
