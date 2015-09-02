@@ -89,7 +89,7 @@ def start_daemon(script, pidfile, logfile):
 	sudo('start-stop-daemon --start --oknodo '
 			'--make-pidfile --pidfile {pidfile} '
 			'--background --startas /bin/bash '
-			'-- -c "exec {script} >>{logfile} 2>&1"'.format(
+			'-- -c "exec {script} >{logfile} 2>&1"'.format(
 				script=script, 
 				pidfile=pidfile,
 				logfile=logfile))
