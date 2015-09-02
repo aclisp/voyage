@@ -2,6 +2,9 @@
 
 A project utilizing docker and kubernetes.
 
+* <http://aclisp.github.io/blog/2015/08/20/kubernetes-scratch.html>
+* <http://aclisp.github.io/blog/2015/08/25/kubernetes-startup.html>
+
 # setup
 
 	fab --list

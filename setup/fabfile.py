@@ -1,12 +1,11 @@
 from fabric.api import *
 import sys
 
-port = 32200
+port = 22
 hosts = [
-	'10.21.196.101', 
-	'10.21.196.123',
-	'10.21.198.37',
-	'10.21.198.38',
+	'192.168.56.101', 
+	'192.168.56.102',
+	'192.168.56.103',
 ]
 
 env.colorize_errors = True
@@ -103,7 +102,10 @@ def status_daemon(pidfile):
 	if pid:
 		sudo('ps -f {pid}'.format(pid=pid))
 	else:
+		print ' *** '
 		print ' *** MISSING COMPONENT *** '
+		print ' *** '
+		print '     '
 		sys.exit(1)
 
 @task
