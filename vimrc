@@ -1,3 +1,6 @@
+scriptencoding utf-8
+set encoding=utf-8
+
 syntax on
 "set background=dark
 set tabstop=4
