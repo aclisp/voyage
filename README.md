@@ -1,11 +1,13 @@
-# voyage
+# Voyage
 
 A project utilizing docker and kubernetes.
 
-* <http://aclisp.github.io/blog/2015/08/20/kubernetes-scratch.html>
-* <http://aclisp.github.io/blog/2015/08/25/kubernetes-startup.html>
+Also see my blog:
 
-# setup
+* [Install k8s from scratch](http://aclisp.github.io/blog/2015/08/20/kubernetes-scratch.html)
+* [Start k8s cluster](http://aclisp.github.io/blog/2015/08/25/kubernetes-startup.html)
+
+# Setup
 
 	fab --list
 
@@ -19,26 +21,26 @@ A project utilizing docker and kubernetes.
 
 	fab -R master,slaves install_docker
 
-# sigma install
+# Install or update binaries and scripts
 
 	fab -R master,slaves install_binary
 
-# sigma start
+# Start the cluster
 
 	fab -R master start_master
 	fab -R slaves start_slave
 
-# sigma stop
-	
+# Stop the cluster
+
 	fab -R slaves stop_slave
 	fab -R master stop_master
 
-# sigma status
+# Check status
 
 	fab -R master status_master
 	fab -R slaves status_slave
 
-# check
+# Verify
 
 	$ kubectl get no
 	NAME           LABELS    STATUS    AGE
@@ -46,14 +48,14 @@ A project utilizing docker and kubernetes.
 	172.16.20.1    <none>    Ready     30m
 	172.16.82.1    <none>    Ready     1h
 	172.16.95.1    <none>    Ready     30m
- 
+
 	$ kubectl get cs
 	NAME                 STATUS    MESSAGE              ERROR
 	controller-manager   Healthy   ok                   nil
 	scheduler            Healthy   ok                   nil
 	etcd-0               Healthy   {"health": "true"}   nil
 
-# add rc
+# Add a replication controller
 
 	$ kubectl create -f rc.nginx.yaml 
 	replicationcontroller "nginx-controller" created
