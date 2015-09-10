@@ -7,6 +7,13 @@ Also see my blog:
 * [Install k8s from scratch](http://aclisp.github.io/blog/2015/08/20/kubernetes-scratch.html)
 * [Start k8s cluster](http://aclisp.github.io/blog/2015/08/25/kubernetes-startup.html)
 
+## Branch information
+
+* `master` - Networking with flannel
+* `purehost` - Not containerize the container’s networking
+
+**Currenly I am working on branch `purehost`.**
+
 # Setup
 
 	fab --list
