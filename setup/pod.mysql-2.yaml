@@ -20,7 +20,8 @@ spec:
     image: mysql
     imagePullPolicy: Never
     ports:
-    - containerPort: 13307
+    - name: mysql-port
+      containerPort: 13307
       hostPort: 13307
       protocol: TCP
       hostIP: 10.21.196.123

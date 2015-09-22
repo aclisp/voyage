@@ -86,6 +86,8 @@ def install_binary():
 	run('sudo cp ~/sigma/logrotate.conf /etc/logrotate.d/sigma')
 	# Setup kubelet per node
 	local('ssh {host} sudo sed -i s/THIS_NODE/{host}/g /opt/sigma/bin/04-start-kubelet.sh'.format(host=env.host))
+	# Setup kube-proxy per node
+	local('ssh {host} sudo sed -i s/THIS_NODE/{host}/g /opt/sigma/bin/06-start-kube-proxy.sh'.format(host=env.host))
 
 
 def start_daemon(script, pidfile, logfile):
@@ -121,9 +123,11 @@ def start_master():
 	start_daemon('/opt/sigma/bin/04-MASTER-start-apiserver.sh', '/run/sigma/apiserver.pid',  '/var/log/sigma/apiserver.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-controller.sh','/run/sigma/controller.pid', '/var/log/sigma/controller.log')
 	start_daemon('/opt/sigma/bin/04-MASTER-start-scheduler.sh', '/run/sigma/scheduler.pid',  '/var/log/sigma/scheduler.log')
+	start_daemon('/opt/sigma/bin/06-start-kube-proxy.sh',       '/run/sigma/kubeproxy.pid',  '/var/log/sigma/kubeproxy.log')
 
 @task
 def stop_master():
+	stop_daemon('/run/sigma/kubeproxy.pid')
 	stop_daemon('/run/sigma/scheduler.pid')
 	stop_daemon('/run/sigma/controller.pid')
 	stop_daemon('/run/sigma/apiserver.pid')
@@ -133,6 +137,7 @@ def stop_master():
 
 @task
 def status_master():
+	status_daemon('/run/sigma/kubeproxy.pid')
 	status_daemon('/run/sigma/scheduler.pid')
 	status_daemon('/run/sigma/controller.pid')
 	status_daemon('/run/sigma/apiserver.pid')
@@ -145,14 +150,17 @@ def start_slave():
 	sudo(        '/opt/sigma/bin/02-create-cbr0.sh')
 	start_daemon('/opt/sigma/bin/03-start-docker-daemon.sh',    '/run/sigma/docker.pid',     '/var/log/sigma/docker.log')
 	start_daemon('/opt/sigma/bin/04-start-kubelet.sh',          '/run/sigma/kubelet.pid',    '/var/log/sigma/kubelet.log')
+	start_daemon('/opt/sigma/bin/06-start-kube-proxy.sh',       '/run/sigma/kubeproxy.pid',  '/var/log/sigma/kubeproxy.log')
 
 @task
 def stop_slave():
+	stop_daemon('/run/sigma/kubeproxy.pid')
 	stop_daemon('/run/sigma/kubelet.pid')
 	stop_daemon('/run/sigma/docker.pid')
 
 @task
 def status_slave():
+	status_daemon('/run/sigma/kubeproxy.pid')
 	status_daemon('/run/sigma/kubelet.pid')
 	status_daemon('/run/sigma/docker.pid')
 
