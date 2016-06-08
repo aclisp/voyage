@@ -1,0 +1,30 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "sigma-console",
+        "namespace": "kube-system",
+        "labels": {
+            "k8s-app": "sigma-console",
+            "kubernetes.io/cluster-service": "true",
+            "kubernetes.io/name": "SigmaConsole",
+            "version": "v10"
+        }
+    },
+    "spec": {
+        "ports": [
+            {
+                "name": "http",
+                "protocol": "TCP",
+                "port": 9900,
+                "targetPort": "http"
+            }
+        ],
+        "selector": {
+            "k8s-app": "sigma-console"
+        },
+        "externalIPs": [
+            "61.160.36.120"
+        ]
+    }
+}
