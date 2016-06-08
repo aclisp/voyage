@@ -1,0 +1,60 @@
+{
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "image-builder"
+    },
+    "spec": {
+        "hostNetwork": true,
+        "nodeSelector": {
+            "role": "image-builder"
+        },
+        "volumes": [
+            {
+                "name": "data",
+                "hostPath": {
+                    "path": "/data/jenkins"
+                }
+            }
+        ],
+        "containers": [
+            {
+                "name": "image-builder",
+                "imagePullPolicy": "IfNotPresent",
+                "image": "61.160.36.122:8080/jenkins",
+                "env": [
+                    {
+                        "name": "JENKINS_OPTS",
+                        "value": "--httpPort=9100"
+                    },
+                    {
+                        "name": "JENKINS_SLAVE_AGENT_PORT",
+                        "value": "9101"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "http",
+                        "containerPort": 9100
+                    },
+                    {
+                        "name": "slave",
+                        "containerPort": 9101
+                    }
+                ],
+                "volumeMounts": [
+                    {
+                        "name": "data",
+                        "mountPath": "/var/jenkins_home"
+                    }
+                ],
+                "resources": {
+                    "limits": {
+                        "cpu": "2",
+                        "memory": "4Gi"
+                    }
+                }
+            }
+        ]
+    }
+}

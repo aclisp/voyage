@@ -1,0 +1,120 @@
+{
+    "kind": "ReplicationController",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "sigma-console-v10",
+        "namespace": "kube-system",
+        "labels": {
+            "k8s-app": "sigma-console",
+            "version": "v10",
+            "kubernetes.io/cluster-service": "true"
+        }
+    },
+    "spec": {
+        "replicas": 1,
+        "selector": {
+            "k8s-app": "sigma-console",
+            "version": "v10"
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "k8s-app": "sigma-console",
+                    "version": "v10",
+                    "kubernetes.io/cluster-service": "true"
+                }
+            },
+            "spec": {
+                "nodeSelector": {
+                    "role": "image-builder"
+                },
+                "volumes": [
+                    {
+                        "name": "persist",
+                        "emptyDir": {}
+                    }
+                ],
+                "containers": [
+                    {
+                        "name": "sigma-console",
+                        "imagePullPolicy": "Always",
+                        "image": "61.160.36.122:8080/golang-sdk:latest",
+                        "args": [
+                            "/sbin/my_init"
+                        ],
+                        "env": [
+                            {
+                                "name": "DAEMON_MONITOR",
+                                "value": "default"
+                            },
+                            {
+                                "name": "SSH_PUBLIC_KEY",
+                                "value": "ssh-dss AAAAB3NzaC1kc3MAAACBAIt56WKO9Ivj2OCvLnu7009douKWfik5sBD6aHHw1SJGaEHcfroSAgl01qF/63XfwDXpnJq0h1vJ2tEvsASrMjaIkVbVDOFHXN0ZF6h4okwfCU/smfX7qFIAJI+chtyviKQPGJITDgyuFaBqc8fpRgx1pPsK1pkjlqPs7q2KH23vAAAAFQDu5hGorui5l+JGgQYGQzA+QjockQAAAIAcgW6/U0V4WlfVqsjyBSawiBaOdaGK54aNxeSZMBjvX9PGDMV1OQSZUW8pV9yvxCX8gAHrBMxlHGJVqlLz0pvv7+IJKNQftf6MG/ijd9amFS+KxwM2KJlGh4lYG4dOlj4MZtt82Ts4HfvQlCY6nLdvC2MeuyVG/GDZ0CY4HvLW+QAAAIAtbhvJqauEEuVSXXlzT0HFa7nc+0tQQZbMMRezmVALa6mS34r+wSBIlZQBLs5OSnHKC6ZA3LBM29IRRVz6JO38ecCiomaf5E1hmyHEO1Orl4f2yxqDjYJcJiu9BZ3cWNoE4+udF50/Eke2RS6iPKIvM5iZfm2Y+TJQ4BpiajDQpA== dw_huanghao"
+                            },
+                            {
+                                "name": "GOPATH",
+                                "value": "/persist/go"
+                            },
+                            {
+                                "name": "PATH",
+                                "value": "$(GOPATH)/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                            }
+                        ],
+                        "ports": [
+                            {
+                                "name": "ssh",
+                                "containerPort": 22
+                            },
+                            {
+                                "name": "http",
+                                "containerPort": 8080
+                            }
+                        ],
+                        "resources": {
+                            "limits": {
+                                "cpu": "1",
+                                "memory": "2Gi"
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "name": "persist",
+                                "mountPath": "/persist"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}
+
+{
+    "kind": "Service",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "sigma-console",
+        "namespace": "kube-system",
+        "labels": {
+            "k8s-app": "sigma-console",
+            "version": "v10",
+            "kubernetes.io/cluster-service": "true",
+            "kubernetes.io/name": "SigmaConsole"
+        }
+    },
+    "spec": {
+        "externalIPs": [
+            "61.160.36.122"
+        ],
+        "ports": [
+            {
+                "name": "http",
+                "port": 9200,
+                "targetPort": "http"
+            }
+        ],
+        "selector": {
+            "k8s-app": "sigma-console"
+        }
+    }
+}

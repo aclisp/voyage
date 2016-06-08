@@ -1,0 +1,229 @@
+{
+  "metadata": {
+    "name": "hadoop-namenode-1"
+  },
+  "spec": {
+    "replicas": 1,
+    "selector": {
+      "managed-by": "hadoop-namenode-1"
+    },
+    "template": {
+      "metadata": {
+        "creationTimestamp": null,
+        "labels": {
+          "managed-by": "hadoop-namenode-1"
+        },
+        "annotations": {
+          "config/slot-1": "<!-- core-site.xml -->\n<configuration>\n<property>\n  <name>hadoop.tmp.dir</name>\n  <value>/persist/hadoop/tmp</value>\n</property>\n<property>\n  <name>fs.defaultFS</name>\n  <value>hdfs://MASTER_ADDRESS:12345/</value>\n</property>\n</configuration>",
+          "config/slot-2": "<!-- hdfs-site.xml -->\n<configuration>\n<property>\n  <name>dfs.namenode.name.dir</name>\n  <value>file:///persist/hadoop/dfs/name</value>\n</property>\n<property>\n  <name>dfs.datanode.data.dir</name>\n  <value>file:///persist/hadoop/dfs/data</value>\n</property>\n<property>\n  <name>dfs.namenode.datanode.registration.ip-hostname-check</name>\n  <value>false</value>\n</property>\n<property>\n  <name>dfs.client.use.datanode.hostname</name>\n  <value>true</value>\n</property>\n<property>\n  <name>dfs.datanode.use.datanode.hostname</name>\n  <value>true</value>\n</property>\n</configuration>",
+          "config/start-1": "#!/bin/bash\n\\cp -f /etc/hadoop/core-site.xml /opt/hadoop/etc/hadoop\n\\cp -f /etc/hadoop/hdfs-site.xml /opt/hadoop/etc/hadoop\n\\sed -i \"s/MASTER_ADDRESS/$SIGMA_CONTAINER_IP/\" /opt/hadoop/etc/hadoop/core-site.xml\n/opt/hadoop/bin/hdfs namenode -format -nonInteractive\nexec /opt/hadoop/bin/hdfs namenode",
+          "config/start-2": "#!/bin/bash\nwhile true; do\necho '127.0.0.1 localhost' > /etc/hosts\ncurl -SGsk -u $SIGMA_LOOKUP_TOKEN --data-urlencode labelSelector=managed-by=hadoop-namenode-1 $SIGMA_LOOKUP_URL | jq -r '.items[]|\"\\(.status.podIP) \\(.metadata.name)\"' >> /etc/hosts\ncurl -SGsk -u $SIGMA_LOOKUP_TOKEN --data-urlencode labelSelector=managed-by=hadoop-datanode-1 $SIGMA_LOOKUP_URL | jq -r '.items[]|\"\\(.status.podIP) \\(.metadata.name)\"' >> /etc/hosts\nsleep 10\ndone"
+        }
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "hostinfo",
+            "hostPath": {
+              "path": "/home/dspeak/yyms"
+            }
+          },
+          {
+            "name": "localtime",
+            "hostPath": {
+              "path": "/etc/localtime"
+            }
+          },
+          {
+            "name": "yy-repos",
+            "hostPath": {
+              "path": "/usr/local/i386"
+            }
+          },
+          {
+            "name": "yymp-agent-sock",
+            "hostPath": {
+              "path": "/tmp/yymp.agent.sock"
+            }
+          },
+          {
+            "name": "persist",
+            "emptyDir": {
+              "medium": ""
+            }
+          },
+          {
+            "name": "start-1",
+            "downwardAPI": {
+              "items": [
+                {
+                  "path": "start.sh",
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.annotations.config/start-1"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "start-2",
+            "downwardAPI": {
+              "items": [
+                {
+                  "path": "start.sh",
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.annotations.config/start-2"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "site-config",
+            "downwardAPI": {
+              "items": [
+                {
+                  "path": "core-site.xml",
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.annotations.config/slot-1"
+                  }
+                },
+                {
+                  "path": "hdfs-site.xml",
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.annotations.config/slot-2"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "hadoop-namenode-1",
+            "image": "61.160.36.122:8080/hadoop-bin:2.7.2-2",
+            "ports": [
+              {
+                "name": "ssh",
+                "containerPort": 22,
+                "protocol": "TCP"
+              },
+              {
+                "name": "namenode",
+                "containerPort": 50070,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "SSH_PUBLIC_KEY",
+                "value": "ssh-dss AAAAB3NzaC1kc3MAAACBAIt56WKO9Ivj2OCvLnu7009douKWfik5sBD6aHHw1SJGaEHcfroSAgl01qF/63XfwDXpnJq0h1vJ2tEvsASrMjaIkVbVDOFHXN0ZF6h4okwfCU/smfX7qFIAJI+chtyviKQPGJITDgyuFaBqc8fpRgx1pPsK1pkjlqPs7q2KH23vAAAAFQDu5hGorui5l+JGgQYGQzA+QjockQAAAIAcgW6/U0V4WlfVqsjyBSawiBaOdaGK54aNxeSZMBjvX9PGDMV1OQSZUW8pV9yvxCX8gAHrBMxlHGJVqlLz0pvv7+IJKNQftf6MG/ijd9amFS+KxwM2KJlGh4lYG4dOlj4MZtt82Ts4HfvQlCY6nLdvC2MeuyVG/GDZ0CY4HvLW+QAAAIAtbhvJqauEEuVSXXlzT0HFa7nc+0tQQZbMMRezmVALa6mS34r+wSBIlZQBLs5OSnHKC6ZA3LBM29IRRVz6JO38ecCiomaf5E1hmyHEO1Orl4f2yxqDjYJcJiu9BZ3cWNoE4+udF50/Eke2RS6iPKIvM5iZfm2Y+TJQ4BpiajDQpA== dw_huanghao"
+              },
+              {
+                "name": "SIGMA_CONTAINER_IP",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.podIP"
+                  }
+                }
+              },
+              {
+                "name": "SIGMA_PROJECT_NAME",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.namespace"
+                  }
+                }
+              },
+              {
+                "name": "SIGMA_API_SERVER",
+                "value": "61.160.36.122"
+              },
+              {
+                "name": "SIGMA_LOOKUP_URL",
+                "value": "https://$(SIGMA_API_SERVER)/api/v1/namespaces/$(SIGMA_PROJECT_NAME)/pods"
+              },
+              {
+                "name": "SIGMA_LOOKUP_TOKEN",
+                "value": "test:test123"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "10",
+                "memory": "20Gi"
+              },
+              "requests": {
+                "cpu": "1",
+                "memory": "2Gi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "hostinfo",
+                "readOnly": true,
+                "mountPath": "/home/dspeak/yyms"
+              },
+              {
+                "name": "localtime",
+                "readOnly": true,
+                "mountPath": "/etc/localtime"
+              },
+              {
+                "name": "yy-repos",
+                "readOnly": true,
+                "mountPath": "/usr/local/i386"
+              },
+              {
+                "name": "yymp-agent-sock",
+                "mountPath": "/tmp/yymp.agent.sock"
+              },
+              {
+                "name": "persist",
+                "mountPath": "/persist"
+              },
+              {
+                "name": "start-1",
+                "mountPath": "/etc/service/hadoop"
+              },
+              {
+                "name": "start-2",
+                "mountPath": "/etc/service/hadoop-lookup"
+              },
+              {
+                "name": "site-config",
+                "mountPath": "/etc/hadoop"
+              }
+            ],
+            "lifecycle": {
+              "postStart": {
+                "exec": {
+                  "command": [
+                    "sh",
+                    "-c",
+                    "cd /etc/service/hadoop && \\cp -f start.sh run && chmod +x run && cd /etc/service/hadoop-lookup && \\cp -f start.sh run && chmod +x run"
+                  ]
+                }
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "project": "default"
+        },
+        "serviceAccountName": ""
+      }
+    }
+  }
+}

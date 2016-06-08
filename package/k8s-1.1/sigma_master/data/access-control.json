@@ -1,0 +1,5 @@
+{"user":"root"}
+{"user":"minion", "readonly": true}
+{"user":"minion", "resource": "events"}
+{"user":"minion", "resource": "nodes"}
+{"user":"minion", "resource": "pods"}

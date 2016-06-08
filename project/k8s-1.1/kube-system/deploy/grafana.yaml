@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: grafana-v10
+  namespace: kube-system
+  labels:
+    k8s-app: grafana
+    version: v10
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: grafana
+    version: v10
+  template:
+    metadata:
+      labels:
+        k8s-app: grafana
+        version: v10
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        master: "true"
+      volumes:
+      - name: grafana-persistent-storage
+        emptyDir: {}
+      containers:
+      - image: sigmas/heapster_grafana:v0.19.1
+        name: grafana
+        resources:
+          limits:
+            cpu: 100m
+            memory: 512Mi
+        env:
+        - name: INFLUXDB_SERVICE_URL
+          value: http://127.0.0.1:8086
+        - name: GF_AUTH_BASIC_ENABLED
+          value: "false"
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "true"
+        - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+          value: Admin
+        - name: GF_SERVER_ROOT_URL
+          value: /api/v1/proxy/namespaces/kube-system/services/monitoring-grafana
+        ports:
+        - name: grafana-port
+          hostPort: 3000
+          containerPort: 3000
+        volumeMounts:
+        - name: grafana-persistent-storage
+          mountPath: /var
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: monitoring-grafana
+  namespace: kube-system
+  labels:
+    k8s-app: grafana
+    version: v10
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Grafana"
+spec:
+  ports:
+  - port: 3000
+    targetPort: grafana-port
+  selector:
+    k8s-app: grafana

@@ -1,0 +1,14 @@
+FROM 61.160.36.122:8080/java-sdk:1.8.0-77
+
+ENV ZOOKEEPER_VERSION 3.3.6
+
+COPY zookeeper-$ZOOKEEPER_VERSION.tar.gz /opt/
+RUN tar -xzf "/opt/zookeeper-$ZOOKEEPER_VERSION.tar.gz" -C /opt \
+  && rm "/opt/zookeeper-$ZOOKEEPER_VERSION.tar.gz" \
+  && mv /opt/zookeeper-$ZOOKEEPER_VERSION /opt/zookeeper
+
+ENV ZOOKEEPER_PREFIX /opt/zookeeper
+ENV PATH $ZOOKEEPER_PREFIX/bin:$PATH
+
+# Build:
+# docker build -t 61.160.36.122:8080/zookeeper:3.3.6 -f Dockerfile.zk .

@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kube-ui-v3
+  namespace: kube-system
+  labels:
+    k8s-app: kube-ui
+    version: v3
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: kube-ui
+    version: v3
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-ui
+        version: v3
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        master: "true"
+      containers:
+      - image: sigmas/kube-ui:v3
+        name: kube-ui
+        resources:
+          limits:
+            cpu: 100m
+            memory: 512Mi
+        command:
+        - /kube-ui
+        - -port=7021
+        ports:
+        - name: kube-ui-port
+          hostPort: 7021
+          containerPort: 7021
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: kube-ui
+  namespace: kube-system
+  labels:
+    k8s-app: kube-ui
+    version: v3
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "KubeUI"
+spec:
+  ports:
+  - port: 7021
+    targetPort: kube-ui-port
+  selector:
+    k8s-app: kube-ui

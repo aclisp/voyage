@@ -1,0 +1,22 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: influxdb
+  namespace: kube-system
+  labels:
+    k8s-app: influxdb
+    version: v10
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "InfluxDB"
+spec:
+  externalIPs:
+  - 61.160.36.122
+  ports:
+  - name: influxdb-http
+    port: 8086
+    targetPort: influxdb-http
+  - name: influxdb-admin
+    port: 8083
+    targetPort: influxdb-admin
+  selector:
+    k8s-app: influxdb

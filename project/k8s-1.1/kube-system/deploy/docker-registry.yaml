@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: docker-reg-v10
+  namespace: kube-system
+  labels:
+    k8s-app: docker-reg
+    version: v10
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: docker-reg
+    version: v10
+  template:
+    metadata:
+      labels:
+        k8s-app: docker-reg
+        version: v10
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        master: "true"
+      volumes:
+      - hostPath:
+          path: /data/docker-registry
+        name: datadir
+      containers:
+      - image: registry:2.2
+        name: docker-reg
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+        ports:
+        - containerPort: 5000
+          hostPort: 5000
+          name: docker-reg-port
+        volumeMounts:
+        - mountPath: /var/lib/registry
+          name: datadir
+        env:
+        - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+          value: /var/lib/registry
+        - name: REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR
+          value: inmemory
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: docker-reg
+  namespace: kube-system
+  labels:
+    k8s-app: docker-reg
+    version: v10
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "DockerRegistry"
+spec:
+  externalIPs:
+  - 61.160.36.122
+  ports:
+  - port: 8080
+    targetPort: docker-reg-port
+  selector:
+    k8s-app: docker-reg

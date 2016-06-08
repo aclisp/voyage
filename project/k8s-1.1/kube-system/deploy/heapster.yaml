@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: heapster-v10
+  namespace: kube-system
+  labels:
+    k8s-app: heapster
+    version: v10
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: heapster
+    version: v10
+  template:
+    metadata:
+      labels:
+        k8s-app: heapster
+        version: v10
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        master: "true"
+      containers:
+      - image: sigmas/heapster:v0.19.1
+        name: heapster
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+        command:
+        - /heapster
+        - -port=7001
+        - -logtostderr=true
+        - -source=kubernetes:?insecure=true
+        - -sink=influxdb:http://127.0.0.1:8086
+        ports:
+        - name: heapster-port
+          hostPort: 7001
+          containerPort: 7001
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: heapster
+  namespace: kube-system
+  labels:
+    k8s-app: heapster
+    version: v10
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Heapster"
+spec:
+  clusterIP: 192.168.0.2
+  ports:
+  - port: 7001
+    targetPort: heapster-port
+  selector:
+    k8s-app: heapster

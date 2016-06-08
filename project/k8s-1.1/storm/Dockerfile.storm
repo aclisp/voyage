@@ -1,0 +1,14 @@
+FROM 61.160.36.122:8080/java-sdk:1.8.0-77
+
+ENV STORM_VERSION 1.0.1
+
+COPY apache-storm-$STORM_VERSION.tar.gz /opt/
+RUN tar -xzf "/opt/apache-storm-$STORM_VERSION.tar.gz" -C /opt \
+  && rm "/opt/apache-storm-$STORM_VERSION.tar.gz" \
+  && mv /opt/apache-storm-$STORM_VERSION /opt/storm
+
+ENV STORM_PREFIX /opt/storm
+ENV PATH $STORM_PREFIX/bin:$PATH
+
+# Build:
+# docker build -t 61.160.36.122:8080/apache-storm:1.0.1 -f Dockerfile.storm .

@@ -1,0 +1,14 @@
+FROM 61.160.36.122:8080/hadoop-bin:2.7.2
+
+ENV SPARK_VERSION 1.6.1
+
+COPY spark-$SPARK_VERSION-bin-without-hadoop.tgz /opt/
+RUN tar -xzf "/opt/spark-$SPARK_VERSION-bin-without-hadoop.tgz" -C /opt \
+  && rm "/opt/spark-$SPARK_VERSION-bin-without-hadoop.tgz" \
+  && mv /opt/spark-$SPARK_VERSION-bin-without-hadoop /opt/spark
+
+ENV SPARK_HOME /opt/spark
+ENV PATH $SPARK_HOME/bin:$PATH
+
+# Build:
+# docker build -t 61.160.36.122:8080/spark:1.6.1 -f Dockerfile.spark-bin .
