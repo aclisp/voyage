@@ -1,0 +1,11 @@
+--docker-root=/data/docker
+--root-dir=/data/kubelet
+--kubeconfig=/data/kubelet/kubeconfig
+--address=0.0.0.0
+--config=/home/huanghao/manifests
+--hostname-override=61.160.36.120
+--pod-infra-container-image=sigmas/pause:2.0
+--api-servers=http://127.0.0.1:8000
+--allow-privileged=true
+--logtostderr=true
+--log-dir=/home/huanghao/kubelet-log
