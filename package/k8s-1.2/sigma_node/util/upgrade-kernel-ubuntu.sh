@@ -15,6 +15,7 @@ apt-get -y update
 apt-get -y purge lxc-docker
 apt-cache policy docker-engine
 apt-cache policy linux-image-generic-lts-trusty
-apt-get -y install linux-image-generic-lts-trusty=3.13.0.86.78
+#apt-get -y install linux-image-generic-lts-trusty=3.13.0.86.78
+dpkg -i kernel-packages/*.deb
 # Reboot when all done
 >&2 echo "Reboot to use the new kernel!"
