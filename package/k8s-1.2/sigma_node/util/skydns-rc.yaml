@@ -134,7 +134,7 @@ spec:
         emptyDir: {}
       - name: config
         hostPath:
-          path: /data/services/sigma_node-1.0.1/conf/api-auth.conf
+          path: /data/services/sigma_node-1.0.3/conf/api-auth.conf
       dnsPolicy: Default  # Don't use cluster DNS.
       nodeSelector:
         master: "true"

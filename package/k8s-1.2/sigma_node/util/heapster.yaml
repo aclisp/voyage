@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: heapster-v1.0.2
+  namespace: kube-system
+  labels:
+    k8s-app: heapster
+    kubernetes.io/cluster-service: "true"
+    version: v1.0.2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: heapster
+      version: v1.0.2
+  template:
+    metadata:
+      labels:
+        k8s-app: heapster
+        version: v1.0.2
+    spec:
+      nodeSelector:
+        master: "true"
+      volumes:
+        - name: config
+          hostPath:
+            path: /data/services/sigma_node-1.0.3/conf/api-auth.conf
+      containers:
+        - image: 61.160.36.122:8080/sigmas/heapster:v1.0.2
+          name: heapster
+          resources:
+            # keep request = limit to keep this container in guaranteed class
+            limits:
+              cpu: 100m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 1Gi
+          command:
+            - /heapster
+            - --source=kubernetes.summary_api:https://192.168.0.1?inClusterConfig=false&insecure=true&auth=/var/lib/kubelet/kubeconfig&useServiceAccount=false
+            - --metric_resolution=60s
+            - --logtostderr=true
+          volumeMounts:
+            - name: config
+              readOnly: true
+              mountPath: /var/lib/kubelet/kubeconfig
