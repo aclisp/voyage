@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kube-dns-v9
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    version: v9
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: kube-dns
+    version: v9
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-dns
+        version: v9
+        kubernetes.io/cluster-service: "true"
+    spec:
+      containers:
+      - name: etcd
+        image: 61.160.36.122:8080/sigmas/etcd:2.0.9
+        resources:
+          limits:
+            cpu: 100m
+            memory: 500Mi
+        command:
+        - /usr/local/bin/etcd
+        - -data-dir
+        - /var/etcd/data
+        - -listen-client-urls
+        - http://127.0.0.1:2379,http://127.0.0.1:4001
+        - -advertise-client-urls
+        - http://127.0.0.1:2379,http://127.0.0.1:4001
+        - -initial-cluster-token
+        - skydns-etcd
+        volumeMounts:
+        - name: etcd-storage
+          mountPath: /var/etcd/data
+      - name: kube2sky
+        image: 61.160.36.122:8080/sigmas/kube2sky:1.11
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        args:
+        # command = "/kube2sky"
+        - -domain=sigma.local
+        - -kube_master_url=https://192.168.0.1
+        - -kubecfg_file=/var/lib/kubelet/kubeconfig
+        volumeMounts:
+        - name: config
+          readOnly: true
+          mountPath: /var/lib/kubelet/kubeconfig
+      - name: skydns
+        image: 61.160.36.122:8080/sigmas/skydns:2015-10-13-8c72f8c
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        args:
+        # command = "/skydns"
+        - -machines=http://127.0.0.1:4001
+        - -addr=0.0.0.0:53
+        - -ns-rotate=false
+        - -domain=sigma.local.
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 1
+          timeoutSeconds: 5
+      - name: healthz
+        image: 61.160.36.122:8080/sigmas/exechealthz:1.0
+        resources:
+          limits:
+            cpu: 50m
+            memory: 100Mi
+        args:
+        - -cmd=nslookup kubernetes.default.svc.sigma.local localhost >/dev/null
+        - -port=8080
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      volumes:
+      - name: etcd-storage
+        emptyDir: {}
+      - name: config
+        hostPath:
+          path: /var/lib/kubelet/kubeconfig
+      dnsPolicy: Default  # Don't use cluster DNS.
+      nodeSelector:
+        master: "true"
