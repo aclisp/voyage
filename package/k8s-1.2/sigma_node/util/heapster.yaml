@@ -24,7 +24,7 @@ spec:
       volumes:
         - name: config
           hostPath:
-            path: /data/services/sigma_node-1.0.3/conf/api-auth.conf
+            path: /data/yy/data/sigma_node/master-info.yaml
       containers:
         - image: 61.160.36.122:8080/sigmas/heapster:v1.0.2
           name: heapster

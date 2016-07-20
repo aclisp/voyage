@@ -104,7 +104,7 @@ spec:
         emptyDir: {}
       - name: config
         hostPath:
-          path: /var/lib/kubelet/kubeconfig
+          path: /data/yy/data/sigma_node/master-info.yaml
       dnsPolicy: Default  # Don't use cluster DNS.
       nodeSelector:
         master: "true"

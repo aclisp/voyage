@@ -1,4 +1,4 @@
 #!/bin/bash
 
-KUBELET_OPTIONS=$(cat conf/kubelet-options.conf | tr '\n' ' ')
-exec bin/kubelet $KUBELET_OPTIONS
+SIGNODE_OPTIONS=$(cat conf/signode-options.conf | tr '\n' ' ')
+exec bin/signode $SIGNODE_OPTIONS

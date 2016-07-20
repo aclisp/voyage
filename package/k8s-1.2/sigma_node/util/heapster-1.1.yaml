@@ -23,7 +23,7 @@ spec:
       volumes:
         - name: config
           hostPath:
-            path: /var/lib/kubelet/kubeconfig
+            path: /data/yy/data/sigma_node/master-info.yaml
       containers:
         - image: 61.160.36.122:8080/sigmas/heapster:v1.0.2
           name: heapster
