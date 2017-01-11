@@ -51,15 +51,36 @@
 
     $ curl -v -XPOST http://119.147.176.214:8080/v2/artifacts --form file=@music_dbgate_m
 
+# Master Nodes (CentOS 6)
+
 安装 ZooKeeper (CentOS 6)
 
 	https://open.mesosphere.com/advanced-course/installing-zookeeper/
+
+    # rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+    # yum -y install zookeeper zookeeper-server
+    # EDIT! /etc/zookeeper/conf/zoo.cfg
+
+    dataDir=/data1/zookeeper
+    clientPortAddress=127.0.0.1
 
 安装 Java 8 (CentOS 6) (Required by Marathon)
 
 	https://gist.github.com/rjurney/7c855a0afa48777755d2
 
-# Slave Nodes
+    # yum remove -y java-1.6.0-openjdk
+    # UPLOAD! jdk-8u111-linux-x64.rpm libevent2-2.0.21-11.1.x86_64.rpm libevent2-devel-2.0.21-11.1.x86_64.rpm
+    # rpm -Uvh jdk-8u111-linux-x64.rpm libevent2-2.0.21-11.1.x86_64.rpm libevent2-devel-2.0.21-11.1.x86_64.rpm
+    # alternatives --display java 
+
+安装 Mesos (CentOS 6)
+
+    # rpm -Uvh http://repos.mesosphere.com/el/6/noarch/RPMS/mesosphere-el-repo-6-2.noarch.rpm
+    # yum -y install mesos marathon 
+    # stop mesos-slave
+    # echo "manual" > /etc/init/mesos-slave.override
+
+# Slave Nodes (Ubuntu)
 
 安装软件包
 
