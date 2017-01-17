@@ -27,7 +27,7 @@ echo $(grep ip_isp_list /home/dspeak/yyms/hostinfo.ini | sed 's/^ip_isp_list=//'
 cp /etc/mesos-slave/hostname /etc/mesos-slave/ip
 mkdir -p /etc/mesos-slave/attributes
 echo idc$(grep idc_id /home/dspeak/yyms/hostinfo.ini | sed 's/^idc_id=//' | head -n 1) > /etc/mesos-slave/attributes/idc_id
-echo "61.160.36.73:5050" > /etc/mesos/zk
+echo "zk://61.160.36.73:2181,61.160.36.74:2181,61.160.36.75:2181/mesos" > /etc/mesos/zk
 start mesos-slave || true
 
 echo "==========================================="

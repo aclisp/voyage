@@ -80,6 +80,46 @@
     # stop mesos-slave
     # echo "manual" > /etc/init/mesos-slave.override
 
+设置 Zookeeper 集群
+
+    # zookeeper-server-initialize --myid=1 (or 2, or 3)
+    # chown -R zookeeper:zookeeper /data1/zookeeper
+    # EDIT! /etc/zookeeper/conf/zoo.cfg
+
+    server.1=61.160.36.73:2888:3888
+    server.2=61.160.36.74:2888:3888
+    server.3=61.160.36.75:2888:3888
+
+    # /etc/init.d/zookeeper-server start
+
+设置 Mesos Master (单点，禁用其它点自启)
+
+    # cd /etc/mesos
+    # echo "zk://61.160.36.73:2181,61.160.36.74:2181,61.160.36.75:2181/mesos" > zk
+    # cd /etc/mesos-master
+    # echo "1" > quorum
+    # echo "40" > max_agent_ping_timeouts
+    # echo "0%" > recovery_agent_removal_limit
+    # mkdir -p /data1/mesos
+    # echo "/data1/mesos" > work_dir
+    # echo "61.160.36.73" > hostname
+    # echo "61.160.36.73" > ip 
+    # start mesos-master
+
+设置 Marathon (单点，禁用其它点自启)
+
+    # mkdir -p /etc/marathon/conf
+    # cd /etc/marathon/conf
+    # mkdir -p /data1/artifact_store
+    # echo "file:///data1/artifact_store" > artifact_store
+    # echo "task_killing" > enable_features
+    # echo "61.160.36.73" > hostname
+    # echo "admin:secretdbgate" > http_credentials
+    # echo "8081" > http_port
+    # echo "zk://61.160.36.73:2181,61.160.36.74:2181,61.160.36.75:2181/mesos" > master
+    # echo "zk://61.160.36.73:2181,61.160.36.74:2181,61.160.36.75:2181/marathon" > zk
+    # start marathon
+
 # Slave Nodes (Ubuntu)
 
 安装软件包
