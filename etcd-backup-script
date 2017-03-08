@@ -1,0 +1,26 @@
+#!/bin/bash
+set -x
+set +H
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+RETAIN=1000
+NOW=$(date +'%Y%m%d-%H%M%S')
+
+
+DISKS=$(ls -1d /data)
+for DISK in $DISKS; do
+    BACKUP_TO_DIR=$DISK/ETCD_BACKUP/$NOW
+    mkdir -p $BACKUP_TO_DIR
+    $THIS_DIR/asset/etcd-backup -config=$THIS_DIR/asset/backup-configuration.json -etcd-config=$THIS_DIR/asset/etcd-configuration.json -file=$BACKUP_TO_DIR/etcd-dump.json dump
+done
+
+for DISK in $DISKS; do
+    DIR=$DISK/ETCD_BACKUP
+    # retain last RETAIN backups
+    if (( $(ls -1 $DIR | wc -l) > $RETAIN )); then
+        for BACKUP in $(ls -1 $DIR | head -n -$RETAIN); do
+            \rm -rf $DIR/$BACKUP
+        done
+    fi
+done
+
