@@ -25,5 +25,6 @@ fun! <SID>StripTrailingWhitespaces()
 endfun
 
 autocmd FileType c,cpp,java,php,ruby,python autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
+autocmd FileType make,go set noexpandtab
 
 au BufNewFile,BufRead *.cpsp setlocal filetype=mason
